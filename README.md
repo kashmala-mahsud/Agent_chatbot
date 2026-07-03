@@ -16,8 +16,6 @@ It supports real-time streaming chat, document uploads, retrieval-augmented gene
 * Search the web with Tavily for current information
 * Store and recall conversation history
 * Simple FastAPI-based web interface
-* Docker-ready deployment
-* AWS CI/CD support using GitHub Actions, ECR, and EC2
 
 ---
 
@@ -33,7 +31,6 @@ This project combines:
 * **Tavily** for web search
 * **ChromaDB** for vector search over uploaded documents
 * **SQLite** for conversation and persistence
-* **Docker** for containerized deployment
 
 ---
 
@@ -46,15 +43,6 @@ Make sure you have the following installed:
 * Git
 * Google API key for Gemini
 * Tavily API key for web search
-
-Optional for deployment:
-
-* Docker
-* AWS account
-* Amazon ECR repository
-* EC2 instance
-* GitHub Actions self-hosted runner
-
 ---
 
 ## Getting Started
@@ -62,13 +50,13 @@ Optional for deployment:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/entbappy/BappyGPT.git
+git clone https://github.com/kashmala-mahsud/Agent_chatbot.git
 ```
 
 ### 2. Navigate to the project directory
 
 ```bash
-cd BappyGPT
+cd Agent_chatbot
 ```
 
 ### 3. Create a virtual environment
@@ -76,13 +64,13 @@ cd BappyGPT
 Using conda:
 
 ```bash
-conda create -n bappygpt python=3.11 -y
+conda create -n Agent_chatbot python=3.11 -y
 ```
 
 ### 4. Activate the virtual environment
 
 ```bash
-conda activate bappygpt
+conda activate Agent_chatbot
 ```
 
 ### 5. Install dependencies
@@ -106,7 +94,7 @@ TAVILY_API_KEY=your_tavily_api_key
 LANGSMITH_TRACING=false
 LANGSMITH_ENDPOINT=https://api.smith.langchain.com
 LANGSMITH_API_KEY=your_langsmith_api_key
-LANGSMITH_PROJECT=bappygpt
+LANGSMITH_PROJECT=Agent_chatbot
 ```
 
 If you do not want to use LangSmith tracing, keep:
@@ -136,7 +124,7 @@ http://127.0.0.1:8080
 ## Project Structure
 
 ```text
-BappyGPT/
+Agent_chatbot/
 │
 ├── app.py                  # FastAPI app and streaming chat endpoints
 ├── agent.py                # LangGraph agent setup and tool orchestration
@@ -144,8 +132,6 @@ BappyGPT/
 ├── rag.py                  # Document ingestion and RAG logic
 ├── tools.py                # Agent tools such as web search, memory, and RAG
 ├── requirements.txt        # Python dependencies
-├── Dockerfile              # Docker image configuration
-├── .dockerignore           # Docker ignore rules
 │
 ├── templates/
 │   └── index.html          # Frontend UI
@@ -157,158 +143,11 @@ BappyGPT/
 
 ---
 
-## Docker Deployment
-
-### 1. Build the Docker image
-
-```bash
-docker build -t bappygpt .
-```
-
-### 2. Run the Docker container
-
-```bash
-docker run -d \
-  --name bappygpt \
-  --restart always \
-  -p 8080:8080 \
-  --env-file .env \
-  bappygpt
-```
-
-The app will be available at:
-
-```text
-http://localhost:8080
-```
-
----
-
-## AWS CI/CD Deployment with GitHub Actions
-
-This project can be deployed to AWS using:
-
-* GitHub Actions
-* Amazon ECR
-* Amazon EC2
-* Docker
-* GitHub self-hosted runner
-
----
-
-### 1. Create an IAM User
-
-Create an IAM user for deployment and attach the following policies:
-
-```text
-AmazonEC2ContainerRegistryFullAccess
-AmazonEC2FullAccess
-```
-
-You can also use a more restricted custom IAM policy for production.
-
----
-
-### 2. Create an ECR Repository
-
-Create an Amazon ECR repository.
-
-Example full ECR image URI:
-
-```text
-315865595366.dkr.ecr.us-east-1.amazonaws.com/bappygpt
-```
-
-For GitHub Secrets, only save the repository name:
-
-```text
-ECR_REPO=bappygpt
-```
-
-Do not save the full ECR URI as `ECR_REPO`.
-
----
-
-### 3. Create an EC2 Instance
-
-Create an Ubuntu EC2 instance.
-
-Recommended inbound security group rule:
-
-```text
-Type: Custom TCP
-Port: 8080
-Source: 0.0.0.0/0
-```
-
----
-
-### 4. Install Docker on EC2
-
-Connect to your EC2 instance and run:
-
-```bash
-sudo apt-get update -y
-sudo apt-get upgrade -y
-```
-
-Install Docker:
-
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-```
-
-Add the Ubuntu user to the Docker group:
-
-```bash
-sudo usermod -aG docker ubuntu
-newgrp docker
-```
-
-Check Docker:
-
-```bash
-docker --version
-```
-
----
-
-### 5. Configure EC2 as a GitHub Self-Hosted Runner
-
-Go to your GitHub repository:
-
-```text
-Settings → Actions → Runners → New self-hosted runner
-```
-
-Select Linux and follow the commands shown by GitHub.
-
-After setup, start the runner:
-
-```bash
-./run.sh
-```
-
-For production, you can configure the runner as a service:
-
-```bash
-sudo ./svc.sh install
-sudo ./svc.sh start
-```
-
----
-
 ## GitHub Secrets
 
 Add the following secrets in your GitHub repository:
 
 ```text
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_DEFAULT_REGION
-ECR_REPO
-
 GOOGLE_API_KEY
 GOOGLE_MODEL
 TAVILY_API_KEY
@@ -327,46 +166,14 @@ GitHub Repository → Settings → Secrets and variables → Actions → New rep
 Example:
 
 ```text
-AWS_DEFAULT_REGION=us-east-1
-ECR_REPO=bappygpt
 GOOGLE_MODEL=gemini-2.5-flash
 LANGSMITH_TRACING=true
 LANGSMITH_ENDPOINT=https://api.smith.langchain.com
-LANGSMITH_PROJECT=bappygpt
+LANGSMITH_PROJECT=Agent_chatbot
 ```
 
 ---
 
-## GitHub Actions Workflow
-
-Create this file:
-
-```text
-.github/workflows/cicd.yaml
-```
-
-This workflow will:
-
-1. Build your Docker image
-2. Push the image to Amazon ECR
-3. Pull the latest image on EC2
-4. Stop the old container
-5. Run the new container
-
----
-
-## Usage
-
-After running locally or deploying to AWS:
-
-1. Open the app in your browser.
-2. Start chatting with the AI assistant.
-3. Upload documents to use them as context.
-4. Ask questions about uploaded files.
-5. Ask current-information questions to trigger web search.
-6. Continue conversations with saved chat history.
-
----
 
 ## Example Questions
 
@@ -393,7 +200,6 @@ Calculate 125 * 48 / 6.
 * Do not commit your `.env` file to GitHub.
 * Keep API keys inside GitHub Secrets for deployment.
 * For production, avoid using `reload=True` in Uvicorn.
-* Make sure port `8080` is open in your EC2 security group.
 * Rotate any API keys that were accidentally exposed publicly.
 
 ---
